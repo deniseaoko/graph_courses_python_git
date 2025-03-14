@@ -1,0 +1,39 @@
+---
+title: "India TB Pathways Analysis"
+format: html
+author: "Denise Owino"
+execute:
+  echo: false
+---
+
+```{python}
+import pandas, plotly,itables
+```
+
+# ***The India TB Pathways dataset is based on a study conducted in Vellore district, Tamil Nadu, India. It examines the pre-diagnostic costs and health-seeking behavior of 880 new adult pulmonary tuberculosis patients registered at Primary Health Centres (PHCs)***.
+
+
+
+```{python}
+import pandas as pd
+india_tb = pd.read_csv("india_tb_pathways_and_costs.csv")
+from itables import show
+india_tb
+```
+
+
+![Map of Tamil Nadu. Vellore district is 
+in the north-east.](images/tndistrict_1.png)
+
+# Displaying graphs
+
+```{python}
+import plotly.express as px
+px.histogram(india_tb, x ="Form of TB" , color = "Sex")
+```
+```{python}
+px.histogram(india_tb,x="Age")
+```
+```{python}
+px.scatter(india_tb,x="Age",y="WtinKgs")
+```

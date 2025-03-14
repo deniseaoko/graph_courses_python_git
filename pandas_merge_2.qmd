@@ -1,0 +1,390 @@
+## packages
+
+```{python}
+import pandas as pd
+import numpy as np
+
+```
+
+```{python}
+# Load datasets
+oil_consumption = pd.read_csv(
+    "https://raw.githubusercontent.com/the-graph-courses/idap_book/main/data/oil_consumption.csv"
+)
+tidyr_population = pd.read_csv(
+    "https://raw.githubusercontent.com/the-graph-courses/idap_book/main/data/tidyr_population.csv"
+)
+country_regions = pd.read_csv(
+    "https://raw.githubusercontent.com/the-graph-courses/idap_book/main/data/country_continent_data.csv"
+)
+
+
+oil_2012 = (
+    oil_consumption[oil_consumption["year"] == 2012].copy().drop(columns=["year"])
+)
+
+# people data
+people = pd.DataFrame({"name": ["Alice", "Bob", "Charlie"], "age": [25, 32, 45]})
+
+test_info_many = pd.DataFrame(
+    {
+        "name": ["Alice", "Alice", "Bob", "Bob", "Charlie", "Charlie"],
+        "test_date": [
+            "2023-06-05",
+            "2023-06-10",
+            "2023-08-10",
+            "2023-05-02",
+            "2023-05-12",
+            "2023-05-15",
+        ],
+        "result": [
+            "Negative",
+            "Positive",
+            "Positive",
+            "Negative",
+            "Negative",
+            "Negative",
+        ],
+    }
+)
+
+farm_info = pd.DataFrame(
+    {
+        "farm_id": [1, 2, 3],
+        "farm_name": ["Green Acres", "Harvest Hill", "Golden Fields"],
+        "location": ["County A", "County B", "County A"],
+    }
+)
+
+crop_yields = pd.DataFrame(
+    {
+        "farm_id": [1, 1, 2, 3, 3],
+        "crop": ["Wheat", "Corn", "Soybeans", "Wheat", "Barley"],
+        "yield_tons": [50, 60, 45, 55, 30],
+    }
+)
+
+traffic_flow = pd.DataFrame(
+    {
+        "street_name": [
+            "Main St",
+            "Main St",
+            "Broadway",
+            "Broadway",
+            "Elm St",
+            "Elm St",
+        ],
+        "time_of_day": ["9am", "2pm", "9am", "2pm", "9am", "2pm"],
+        "vehicle_count": [1200, 900, 1500, 1100, 700, 600],
+    }
+)
+
+pollution_levels = pd.DataFrame(
+    {
+        "street_name": [
+            "Main St",
+            "Main St",
+            "Broadway",
+            "Broadway",
+            "Elm St",
+            "Elm St",
+        ],
+        "time_of_day": ["9am", "2pm", "9am", "2pm", "9am", "2pm"],
+        "pm_2_5_level": [35.5, 42.1, 40.3, 48.2, 25.7, 30.9],
+    }
+)
+
+test_info_diff = pd.DataFrame(
+    {
+        "name": ["alice", "Bob", "Charlie "],
+        "test_date": ["2023-06-05", "2023-08-10", "2023-05-02"],
+        "result": ["Negative", "Positive", "Negative"],
+    }
+)
+
+asia_countries = pd.DataFrame(
+    {
+        "Country": ["India", "Indonesia", "Philippines"],
+        "Capital": ["New Delhi", "Jakarta", "Manila"],
+    }
+)
+
+asia_population = pd.DataFrame(
+    {
+        "Country": ["India", "indonesia", "Philipines"],
+        "Population": [1393000000, 273500000, 113000000],
+        "Life_Expectancy": [69.7, 71.7, 72.7],
+    }
+)
+```
+
+```{python}
+pip install country_converter
+```
+
+```{python}
+import pandas as pd
+import country_converter as cc
+```
+
+## one to many joins
+
+
+```{python}
+people
+```
+
+```{python}
+test_info_many
+```
+
+```{python}
+pd.merge(people,test_info_many)
+```
+
+Run the code below to print the two small dataframes:
+
+```{python}
+farm_info
+```
+
+```{python}
+crop_yields
+```
+
+If you use a 'merge()' to join these datasets,how many rows will be in the final dataframe? 5
+
+```{python}
+pd.merge(farm_info,crop_yields)
+```
+
+## Miltiple Key Columns 
+
+
+```{python}
+traffic_flow
+```
+
+```{python}
+pollution_levels
+```
+
+```{python}
+pd.merge(traffic_flow,pollution_levels,on="street_name")
+```
+
+```{python}
+pd.merge(traffic_flow,pollution_levels,on=["street_name","time_of_day"])
+```
+
+We have two datasets containing information about countries:
+-'oil_consumption': Contains yearly oil consumption in tonnes
+-'tidyr_population': Contains yearly population data
+
+```{python}
+oil_consumption.sort_values(by=["country","year"])
+```
+
+```{python}
+tidyr_population.sort_values(by=["country","year"])
+```
+
+Join these datasets using 'merge()' with a left join. Since we want to match both country and year,you'll need to join on multiple columns.
+
+```{python}
+merged_oil = pd.merge(oil_consumption,tidyr_population,how="left",on=["country","year"])
+```
+
+After joining, create a new column called 'consumption_per_capita' that calculates the yearly consumtion per person in tonnes.
+
+```{python}
+merged_oil ["consumption_per_capita"] = merged_oil["oil_consump"]/ merged_oil ["population"]
+merged_oil
+```
+
+Which country had the highest per capita oil consumption in 1995?
+
+```{python}
+highest_1995 = merged_oil[merged_oil["year"] == 1995 ]
+highest_1995
+```
+
+
+```{python}
+highest_per_capita = highest_1995.loc[highest_1995["consumption_per_capita"].idxmax()]
+highest_per_capita
+```
+
+## Key Mismatches
+
+```{python}
+people
+```
+
+```{python}
+test_info_diff
+```
+
+```{python}
+pd.merge(people,test_info_diff)
+```
+
+```{python}
+test_info_diff["name"] = test_info_diff["name"].str.title()
+test_info_diff
+```
+
+```{python}
+pd.merge(people,test_info_diff)
+```
+
+```{python}
+test_info_diff['name'].unique()
+```
+
+```{python}
+test_info_diff["name"] = test_info_diff["name"].str.strip()
+```
+
+```{python}
+pd.merge(people,test_info_diff)
+```
+
+## Practice Q 
+
+```{python}
+asia_countries
+```
+
+```{python}
+asia_population
+```
+
+```{python}
+pd.merge(asia_countries,asia_population)
+```
+
+```{python}
+asia_population["Country"] = asia_population["Country"].str.title()
+asia_population
+```
+
+```{python}
+asia_population["Country"] = asia_population["Country"].replace("Philipines","Philippines")
+```
+
+
+```{python}
+pd.merge(asia_countries,asia_population)
+```
+
+## Key Mismatches: Oil Consumption Example
+
+```{python}
+oil_consumption.sort_values(["country","year"])
+```
+
+
+```{python}
+tidyr_population
+```
+
+```{python}
+oil_pop = pd.merge(oil_consumption,tidyr_population,how="left",on =["country","year"]).sort_values(["country","year"])
+oil_pop
+```
+
+```{python}
+oil_countries = set(oil_consumption["country"].unique())
+pop_countries = set(tidyr_population["country"].unique())
+```
+
+```{python}
+# Countries in oil but not in pop
+pop_countries-oil_countries
+```
+
+```{python}
+# Countries in oil but not in pop
+oil_countries-pop_countries
+```
+
+```{python}
+# Side note on set arithmetic
+set1 = set([1,2,3,4,5])
+set2 = set([2,3,4])
+
+set1-set2
+```
+## Merging with Country Codes
+
+```{python}
+cc.convert("Vietnam", to="ISO3")
+```
+
+```{python}
+oil_consumption["country_code"] = cc.convert(oil_consumption["country"],to="ISO3")
+tidyr_population["country_code"] = cc.convert(tidyr_population["country"],to="ISO3")
+```
+
+```{python}
+oil_countries = set(oil_consumption["country_code"].unique())
+pop_countries = set(tidyr_population["country_code"].unique())
+```
+
+```{python}
+# Countries in oil but not in pop
+oil_countries-pop_countries
+```
+## Practice Q: Merging
+
+
+
+Join the two datsets using the country codes as the key. Then find the countries with the highest oil consumption in each continent.
+
+```{python}
+oil_2012
+```
+
+```{python}
+country_regions
+```
+
+```{python}
+oil_consump = pd.merge(oil_2012,country_regions,how="left",left_on ="country",right_on = "country_name")
+oil_consump
+```
+
+```{python}
+oil_consump_countries = set(oil_2012["country"].unique())
+region_countries = set(country_regions["country_name"].unique())
+```
+
+```{python}
+oil_consump_countries-region_countries
+```
+
+```{python}
+oil_2012["country_code"] = cc.convert(oil_2012["country"],to="ISO3")
+oil_2012
+```
+
+```{python}
+oil_countries_2 = set(oil_2012["country_code"].unique())
+pop_countries_2 = set(country_regions["country_code"].unique())
+```
+
+```{python}
+oil_countries_2-pop_countries_2
+```
+
+```{python}
+oil_consump_new = pd.merge(oil_2012,country_regions,on = "country_code")
+oil_consump_new
+```
+
+```{python}
+max_consumption = oil_consump_new.loc[oil_consump_new.groupby("continent")["oil_consump"].idxmax()]
+max_consumption
+```
+
